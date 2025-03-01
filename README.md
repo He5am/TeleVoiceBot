@@ -1,4 +1,4 @@
-# KianVoiceMail Bot
+# TeleVoiceBot
 
 یک ربات تلگرام برای مدیریت و ارسال پیام‌های صوتی Asterisk به گروه‌های تلگرام.
 
@@ -13,8 +13,8 @@
 
 1. کلون کردن مخزن:
 ```bash
-git clone https://github.com/He5am/KianVoiceMail.git
-cd KianVoiceMail
+git clone https://github.com/He5am/TeleVoiceBot.git
+cd TeleVoiceBot
 ```
 
 2. نصب وابستگی‌ها:
