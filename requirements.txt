@@ -1,0 +1,4 @@
+pyTelegramBotAPI==4.15.2
+paramiko==3.4.0
+python-dotenv==1.0.1
+pytz==2024.1 
