@@ -7,6 +7,7 @@ import traceback
 from datetime import datetime
 import pytz
 from dotenv import load_dotenv
+import threading
 
 # Load environment variables
 load_dotenv()
@@ -67,6 +68,30 @@ logging.basicConfig(
 bot = telebot.TeleBot(CONFIG['TOKEN'])
 telebot.apihelper.CONNECT_TIMEOUT = 30
 telebot.apihelper.READ_TIMEOUT = 30
+
+# Add start command handler for findid functionality
+@bot.message_handler(commands=['start'])
+def handle_start(message):
+    chat_id = message.chat.id
+    thread_id = message.message_thread_id if message.message_thread_id else 0
+    chat_type = message.chat.type
+    chat_title = message.chat.title if message.chat.title else "Private Chat"
+    
+    # پیام به کاربر
+    if chat_type == 'private':
+        bot.reply_to(message, "سلام! اطلاعات چت شما ثبت شد.")
+    else:
+        bot.reply_to(message, "سلام! اطلاعات گروه و تاپیک ثبت شد.", message_thread_id=thread_id)
+    
+    # ارسال اطلاعات به ادمین
+    admin_message = f"""
+🆔 New Bot Start:
+Chat Type: {chat_type}
+Chat Title: {chat_title}
+Chat ID: {chat_id}
+Thread ID: {thread_id}
+"""
+    bot.send_message(CONFIG['ADMIN_CHAT_ID'], admin_message)
 
 class VoicemailMonitor:
     def __init__(self):
@@ -219,6 +244,23 @@ class VoicemailMonitor:
                 self.ssh_client.close()
                 logging.info("SSH connection closed")
 
-if __name__ == "__main__":
+def run_bot():
     monitor = VoicemailMonitor()
-    monitor.start_monitoring()
+    while True:
+        try:
+            print("Bot started. Press Ctrl+C to stop.")
+            # Start voicemail monitoring in a separate thread
+            monitor_thread = threading.Thread(target=monitor.start_monitoring)
+            monitor_thread.daemon = True
+            monitor_thread.start()
+            
+            # Start bot polling
+            bot.polling(none_stop=True, interval=3, timeout=30)
+        except Exception as e:
+            print(f"Bot encountered an error: {e}")
+            print("Restarting in 10 seconds...")
+            time.sleep(10)
+            continue
+
+if __name__ == "__main__":
+    run_bot() 
